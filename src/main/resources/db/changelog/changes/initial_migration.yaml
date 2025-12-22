@@ -1,0 +1,415 @@
+databaseChangeLog:
+  # -----------------------------------------------------------------
+  # PROPERTIES
+  # Define database-agnostic variables
+  # -----------------------------------------------------------------
+  - property:
+      name: char.unit
+      value: "CHAR"
+      dbms: oracle
+  - property:
+      name: char.unit
+      value: ""
+      dbms: "!oracle"
+
+  - property:
+      name: "now"
+      value: "CURRENT_TIMESTAMP"
+      dbms: oracle
+  - property:
+      name: "now"
+      value: "now()"
+      dbms: postgresql
+  - property:
+      name: "now"
+      value: "GETDATE()"
+      dbms: mssql
+  - property:
+      name: "now"
+      value: "NOW()"
+      dbms: mysql,h2
+
+  # -----------------------------------------------------------------
+  # CHANGESET 1: CREATE TABLES
+  # -----------------------------------------------------------------
+  - changeSet:
+      id: 1.0.0-1-create-users
+      author: sunil
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR2(255 ${char.unit})
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: username
+                  type: VARCHAR2(255 ${char.unit})
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR2(255 ${char.unit})
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: "${now}"
+              - column:
+                  name: updated_at
+                  type: timestamp
+
+  - changeSet:
+      id: 1.0.0-2-create-wallets
+      author: sunil
+      changes:
+        - createTable:
+            tableName: wallets
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR2(255 ${char.unit})
+              - column:
+                  name: own
+                  type: boolean
+                  defaultValueNumeric: 1
+              - column:
+                  name: amount
+                  type: NUMBER(19, 4)
+                  defaultValueNumeric: 0.0
+              - column:
+                  name: debt_amount
+                  type: NUMBER(19, 4)
+                  defaultValueNumeric: 0.0
+              - column:
+                  name: created_by
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: "${now}"
+              - column:
+                  name: updated_at
+                  type: timestamp
+
+  - changeSet:
+      id: 1.0.0-3-create-categories
+      author: sunil
+      changes:
+        - createTable:
+            tableName: categories
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR2(255 ${char.unit})
+              - column:
+                  name: additional_detail
+                  type: CLOB
+              - column:
+                  name: created_by
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: "${now}"
+              - column:
+                  name: updated_at
+                  type: timestamp
+
+  - changeSet:
+      id: 1.0.0-4-create-messages
+      author: sunil
+      changes:
+        - createTable:
+            tableName: messages
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: sender
+                  type: VARCHAR2(255 ${char.unit})
+              - column:
+                  name: delivered_time
+                  type: timestamp
+              - column:
+                  name: message
+                  type: CLOB
+              - column:
+                  name: delivered_to
+                  type: BIGINT
+              - column:
+                  name: account_no
+                  type: VARCHAR2(50 ${char.unit})
+              - column:
+                  name: amount
+                  type: NUMBER(19, 4)
+              - column:
+                  name: transfer_type
+                  type: VARCHAR2(50 ${char.unit})
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: "${now}"
+              - column:
+                  name: updated_at
+                  type: timestamp
+
+  - changeSet:
+      id: 1.0.0-5-create-transactions
+      author: sunil
+      changes:
+        - createTable:
+            tableName: transactions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: from_wallet_id
+                  type: BIGINT
+              - column:
+                  name: to_wallet_id
+                  type: BIGINT
+              - column:
+                  name: amount
+                  type: NUMBER(19, 4)
+              - column:
+                  name: description
+                  type: CLOB
+              - column:
+                  name: category_id
+                  type: BIGINT
+              - column:
+                  name: additional_details
+                  type: CLOB
+              - column:
+                  name: is_debt
+                  type: boolean
+                  defaultValueNumeric: 0
+              - column:
+                  name: parent_id
+                  type: BIGINT
+              - column:
+                  name: created_by
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: message_id
+                  type: BIGINT
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: "${now}"
+              - column:
+                  name: updated_at
+                  type: timestamp
+
+  - changeSet:
+      id: 1.0.0-6-create-auto-actions
+      author: sunil
+      changes:
+        - createTable:
+            tableName: auto_actions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: category_id
+                  type: BIGINT
+              - column:
+                  name: priority
+                  type: NUMBER(10)
+                  defaultValueNumeric: 0
+              - column:
+                  name: from_expr
+                  type: CLOB
+              - column:
+                  name: to_expr
+                  type: CLOB
+              - column:
+                  name: amount_expr
+                  type: CLOB
+              - column:
+                  name: category_expr
+                  type: CLOB
+              - column:
+                  name: is_debt
+                  type: boolean
+                  defaultValueNumeric: 0
+              - column:
+                  name: created_by
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: "${now}"
+              - column:
+                  name: updated_at
+                  type: timestamp
+
+  # -----------------------------------------------------------------
+  # CHANGESET 2A: ADD BOOLEAN CHECKS (USING RAW SQL)
+  # Applies the 0/1 rule to all columns mapped to Java Boolean.
+  # -----------------------------------------------------------------
+  - changeSet:
+      id: 1.0.0-7-add-boolean-checks-sql
+      author: sunil
+      dbms: oracle # Run only on Oracle
+      changes:
+        - sql: |
+            -- 1. Wallets.own: Modify column type (Liquibase maps BOOLEAN to NUMBER(1,0))
+            ALTER TABLE wallets 
+            MODIFY own NUMBER(1,0) DEFAULT 1
+            CONSTRAINT chk_wallets_own CHECK (own IN (0, 1))
+            CONSTRAINT nn_wallets_own NOT NULL;
+
+            -- 2. Transactions.is_debt
+            ALTER TABLE transactions 
+            ADD CONSTRAINT chk_transactions_is_debt CHECK (is_debt IN (0, 1));
+
+            -- 3. Auto_actions.is_debt
+            ALTER TABLE auto_actions 
+            ADD CONSTRAINT chk_auto_actions_is_debt CHECK (is_debt IN (0, 1));
+          splitStatements: true
+          endDelimiter: ";"
+
+  # -----------------------------------------------------------------
+  # CHANGESET 2B: ADD JSON CHECKS (USING RAW SQL)
+  # Ensures CLOB fields contain valid JSON.
+  # -----------------------------------------------------------------
+  - changeSet:
+      id: 1.0.0-8-add-json-check-sql
+      author: sunil
+      dbms: oracle # Run only on Oracle
+      changes:
+        - sql: |
+            -- 1. Transactions.additional_details
+            ALTER TABLE transactions 
+            ADD CONSTRAINT chk_transactions_details_json CHECK (additional_details IS JSON);
+
+            -- 2. Categories.additional_detail
+            -- NOTE: Changed from 'additional_details' in original request to 'additional_detail'
+            -- to match the table creation in 1.0.0-3
+            ALTER TABLE categories 
+            ADD CONSTRAINT chk_categories_details_json CHECK (additional_detail IS JSON);
+          splitStatements: true
+          endDelimiter: ";"
+
+  # -----------------------------------------------------------------
+  # CHANGESET 3: ADD FOREIGN KEY CONSTRAINTS
+  # -----------------------------------------------------------------
+  - changeSet:
+      id: 1.0.0-9-add-foreign-keys
+      author: sunil
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: wallets
+            baseColumnNames: created_by
+            constraintName: fk_wallets_created_by
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: categories
+            baseColumnNames: created_by
+            constraintName: fk_categories_created_by
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: messages
+            baseColumnNames: delivered_to
+            constraintName: fk_messages_delivered_to
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: transactions
+            baseColumnNames: from_wallet_id
+            constraintName: fk_transactions_from_wallet
+            referencedTableName: wallets
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: transactions
+            baseColumnNames: to_wallet_id
+            constraintName: fk_transactions_to_wallet
+            referencedTableName: wallets
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: transactions
+            baseColumnNames: category_id
+            constraintName: fk_transactions_category
+            referencedTableName: categories
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: transactions
+            baseColumnNames: parent_id
+            constraintName: fk_transactions_parent
+            referencedTableName: transactions
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: transactions
+            baseColumnNames: created_by
+            constraintName: fk_transactions_created_by
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: transactions
+            baseColumnNames: message_id
+            constraintName: fk_transactions_message
+            referencedTableName: messages
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: auto_actions
+            baseColumnNames: category_id
+            constraintName: fk_auto_actions_category
+            referencedTableName: categories
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: auto_actions
+            baseColumnNames: created_by
+            constraintName: fk_auto_actions_created_by
+            referencedTableName: users
+            referencedColumnNames: id
